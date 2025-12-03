@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { generateToken } = require('../utils/jwt');
+const bcrypt = require('bcrypt');
 
 // Route pour s'inscrire
 router.post('/register', async (req, res) => {
@@ -12,7 +13,7 @@ router.post('/register', async (req, res) => {
     if (existingUsers.length > 0) {
       return res.status(400).json({ error: 'Email ou nom d\'utilisateur déjà utilisé' });
     }
-    const [results] = await req.db.execute(insertSql, [username, email, password]);
+    const [results] = await req.db.execute(insertSql, [username, email, bcrypt.hashSync(password, 10)]);
     res.status(201).json({ message: 'Utilisateur créé avec succès', id: results.insertId });
   } catch (err) {
     console.error('Erreur lors de l\'inscription :', err);
@@ -30,7 +31,7 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Email incorrect' });
     }
     const user = results[0];
-    if (user.password !== password) {
+    if (!bcrypt.compareSync(password, user.password)) {
       return res.status(401).json({ error: 'Mot de passe incorrect' });
     }
     const token = generateToken(user);
