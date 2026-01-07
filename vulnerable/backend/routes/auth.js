@@ -15,6 +15,7 @@ router.post('/register', async (req, res) => {
     }
     const [results] = await req.db.execute(insertSql, [username, email, bcrypt.hashSync(password, 10)]);
     res.status(201).json({ message: 'Utilisateur créé avec succès', id: results.insertId });
+
   } catch (err) {
     console.error('Erreur lors de l\'inscription :', err);
     res.status(500).json({ error: 'Erreur lors de l\'inscription' });
@@ -34,8 +35,9 @@ router.post('/login', async (req, res) => {
     if (!bcrypt.compareSync(password, user.password)) {
       return res.status(401).json({ error: 'Mot de passe incorrect' });
     }
-    const token = generateToken(user);
-    res.json({ message: 'Connexion réussie', token, user });
+    const { password: _, ...userWithoutPassword } = user;
+    const token = generateToken(userWithoutPassword);
+    res.json({ message: 'Connexion réussie', token, user: userWithoutPassword });
   } catch (err) {
     console.error('Erreur lors de la connexion :', err);
     res.status(500).json({ error: 'Erreur lors de la connexion' });

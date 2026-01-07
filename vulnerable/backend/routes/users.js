@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate, authorizeAdmin } = require('../middlewares/authMiddleware');
+const bcrypt = require('bcrypt');
 
 // Route pour lister les utilisateurs
 router.get('/', async (req, res) => {
@@ -47,11 +48,25 @@ router.delete('/:id', async (req, res) => {
 router.put('/:id', async (req, res) => {
   const { id } = req.params;
   const { username, email, password, role } = req.body;
-  const sql = 'UPDATE users SET username = ?, email = ?, password = ?, role = ? WHERE id = ?';
+
   try {
-    await req.db.execute(sql, [username, email, password, role, id]);
-    const newUser = { id, username, email, password, role };
-    res.json({ message: 'Utilisateur modifié avec succès', user: newUser });
+    let sql;
+    let params;
+
+    if (password) {
+      const hashedPassword = bcrypt.hashSync(password, 10);
+      sql = 'UPDATE users SET username = ?, email = ?, password = ?, role = ? WHERE id = ?';
+      params = [username, email, hashedPassword, role, id];
+    } else {
+      sql = 'UPDATE users SET username = ?, email = ?, role = ? WHERE id = ?';
+      params = [username, email, role, id];
+    }
+
+    await req.db.execute(sql, params);
+
+    // Return user without password
+    const userResponse = { id, username, email, role };
+    res.json({ message: 'Utilisateur modifié avec succès', user: userResponse });
   } catch (err) {
     console.error('Erreur lors de la modification de l\'utilisateur :', err);
     res.status(500).json({ error: 'Erreur lors de la modification de l\'utilisateur' });
