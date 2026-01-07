@@ -35,9 +35,9 @@ router.post('/login', async (req, res) => {
     if (!bcrypt.compareSync(password, user.password)) {
       return res.status(401).json({ error: 'Mot de passe incorrect' });
     }
-    const { password: _, ...userWithoutPassword } = user;
-    const token = generateToken(userWithoutPassword);
-    res.json({ message: 'Connexion réussie', token, user: userWithoutPassword });
+    const { password: _p, email: _e, created_at: _c, ...userWithoutSensibleData } = user;
+    const token = generateToken(userWithoutSensibleData);
+    res.json({ message: 'Connexion réussie', token, user: userWithoutSensibleData });
   } catch (err) {
     console.error('Erreur lors de la connexion :', err);
     res.status(500).json({ error: 'Erreur lors de la connexion' });
