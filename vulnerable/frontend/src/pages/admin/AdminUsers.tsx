@@ -17,11 +17,6 @@ const AdminUsersPage = () => {
   const [users, setUsers] = useState<User[]>([]);
 
   useEffect(() => {
-    if (!user || user.role !== "admin") {
-      navigate("/login");
-      return;
-    }
-
     // Récupérer les utilisateurs
     axiosInstance
       .get("/users")
@@ -58,7 +53,7 @@ const AdminUsersPage = () => {
     try {
       const response = await axiosInstance.put(`/users/${id}`, user);
       toast.success("Rôle mis à jour !");
-      setUsers(users.map((user) => (user.id === id ? response.data : user)));
+      setUsers(users.map((u) => (u.id === id ? { ...u, ...response.data.user } : u)));
     } catch (error) {
       console.error("Erreur lors de la mise à jour du rôle :", error);
       toast.error("Impossible de mettre à jour le rôle.");

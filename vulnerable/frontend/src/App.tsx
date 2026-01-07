@@ -13,6 +13,7 @@ import HomePage from './pages/Home';
 import LoginPage from './pages/Login';
 import NotFoundPage from './pages/NotFound';
 import RegisterPage from './pages/Register';
+import ProtectedRoute from "./components/ProtectedRoute";
 
 
 function App() {
@@ -26,8 +27,8 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/article/:id" element={<ArticlePage />} />
-          <Route path="/admin/articles" element={<AdminArticlesPage />} />
-          <Route path="/admin/users" element={<AdminUsersPage />} />
+          <Route path="/admin/articles" element={<ProtectedRoute><AdminArticlesPage /></ProtectedRoute>} />
+          <Route path="/admin/users" element={<ProtectedRoute><AdminUsersPage /></ProtectedRoute>} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
         <Footer />

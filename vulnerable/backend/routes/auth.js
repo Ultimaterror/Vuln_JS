@@ -3,6 +3,7 @@ const router = express.Router();
 const { generateToken } = require('../utils/jwt');
 const bcrypt = require('bcrypt');
 const { validatePassword } = require('../utils/validation');
+const { authenticate, authorizeAdmin } = require('../middlewares/authMiddleware');
 
 // Route pour s'inscrire
 router.post('/register', async (req, res) => {
@@ -49,6 +50,11 @@ router.post('/login', async (req, res) => {
     console.error('Erreur lors de la connexion :', err);
     res.status(500).json({ error: 'Erreur lors de la connexion' });
   }
+});
+
+// Route pour vérifier si l'utilisateur est admin
+router.get('/access-admin', authenticate, authorizeAdmin, (req, res) => {
+  res.json({ isAdmin: true });
 });
 
 module.exports = router;
