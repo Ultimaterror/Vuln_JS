@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { authenticate, authorizeAdmin } = require('../middlewares/authMiddleware');
 const bcrypt = require('bcrypt');
+const { validatePassword } = require('../utils/validation');
 
 // Route pour lister les utilisateurs
 router.get('/', async (req, res) => {
@@ -54,6 +55,10 @@ router.put('/:id', async (req, res) => {
     let params;
 
     if (password) {
+      const validation = validatePassword(password);
+      if (!validation.isValid) {
+        return res.status(400).json({ error: validation.message });
+      }
       const hashedPassword = bcrypt.hashSync(password, 10);
       sql = 'UPDATE users SET username = ?, email = ?, password = ?, role = ? WHERE id = ?';
       params = [username, email, hashedPassword, role, id];

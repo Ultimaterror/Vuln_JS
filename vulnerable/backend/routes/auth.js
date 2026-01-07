@@ -2,10 +2,17 @@ const express = require('express');
 const router = express.Router();
 const { generateToken } = require('../utils/jwt');
 const bcrypt = require('bcrypt');
+const { validatePassword } = require('../utils/validation');
 
 // Route pour s'inscrire
 router.post('/register', async (req, res) => {
   const { username, email, password } = req.body;
+
+  const validation = validatePassword(password);
+  if (!validation.isValid) {
+    return res.status(400).json({ error: validation.message });
+  }
+
   const checkSql = 'SELECT * FROM users WHERE email = ? OR username = ?';
   const insertSql = 'INSERT INTO users (username, email, password) VALUES (?, ?, ?)';
   try {
