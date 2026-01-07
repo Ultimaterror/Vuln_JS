@@ -51,9 +51,10 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// Route pour créer un nouvel article
-router.post('/', async (req, res) => {
-  const { title, content, author_id } = req.body;
+// Route pour créer un nouvel article (admin seulement)
+router.post('/', authenticate, authorizeAdmin, async (req, res) => {
+  const { title, content } = req.body;
+  const author_id = req.user.id;
   const sql = 'INSERT INTO articles (title, content, author_id) VALUES (?, ?, ?)';
   try {
     const [results] = await req.db.execute(sql, [title, content, author_id]);
@@ -70,8 +71,8 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Route pour modifier un article
-router.put('/:id', async (req, res) => {
+// Route pour modifier un article (admin seulement)
+router.put('/:id', authenticate, authorizeAdmin, async (req, res) => {
   const { id } = req.params;
   const { title, content, author_id } = req.body;
   const sql = 'UPDATE articles SET title = ?, content = ?, author_id = ? WHERE id = ?';
@@ -93,7 +94,7 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// Route pour supprimer un article
+// Route pour supprimer un article (admin seulement)
 router.delete('/:id', authenticate, authorizeAdmin, async (req, res) => {
   const { id } = req.params;
   const sql = 'DELETE FROM articles WHERE id = ?';

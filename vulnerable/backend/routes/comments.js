@@ -33,10 +33,11 @@ router.get('/comments/:id', async (req, res) => {
   }
 });
 
-// Route pour ajouter un commentaire
-router.post('/articles/:id/comments', async (req, res) => {
+// Route pour ajouter un commentaire (auth)
+router.post('/articles/:id/comments', authenticate, async (req, res) => {
   const { id } = req.params;
-  const { content, user_id } = req.body;
+  const { content } = req.body;
+  const user_id = req.user.id;
   const sql = 'INSERT INTO comments (content, user_id, article_id) VALUES (?, ?, ?)';
   try {
     const [results] = await req.db.execute(sql, [content, user_id, id]);
@@ -54,7 +55,7 @@ router.post('/articles/:id/comments', async (req, res) => {
 });
 
 // Route pour supprimer un commentaire (admin seulement)
-router.delete('/comments/:id', async (req, res) => {
+router.delete('/comments/:id', authenticate, authorizeAdmin, async (req, res) => {
   const { id } = req.params;
   const sql = 'DELETE FROM comments WHERE id = ?';
   try {

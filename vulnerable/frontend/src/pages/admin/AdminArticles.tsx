@@ -106,13 +106,12 @@ const AdminArticlesPage = () => {
       const newArticle = {
         title,
         content,
-        author_id: user ? user.id : undefined,
       };
 
       try {
         const response = await axiosInstance.post("/articles", newArticle);
         toast.success("Article ajouté !");
-        setArticles([...articles, { ...newArticle, id: response.data.id, comments: [] }]);
+        setArticles([...articles, { ...newArticle, id: response.data.id, author_id: user ? user.id : undefined, comments: [] }]);
         setTitle("");
         setContent("");
         if (quillRef.current) {

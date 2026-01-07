@@ -76,8 +76,7 @@ const ArticlePage = () => {
     // Envoyer le nouveau commentaire
     axiosInstance
       .post(`/articles/${id}/comments`, {
-        content: newComment,
-        user_id: user.id,
+        content: newComment
       })
       .then((response) => {
         toast.success("Commentaire ajouté !");
