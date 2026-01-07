@@ -93,8 +93,8 @@ router.put("/:id", authenticate, async (req, res) => {
 			});
 		}
 
-		let sql;
-		let params;
+		let sql = "UPDATE users SET username = ?, email = ?";
+		let params = [username, email];
 
 		if (password) {
 			const validation = validatePassword(password);
@@ -102,13 +102,17 @@ router.put("/:id", authenticate, async (req, res) => {
 				return res.status(400).json({ error: validation.message });
 			}
 			const hashedPassword = bcrypt.hashSync(password, 10);
-			sql =
-				"UPDATE users SET username = ?, email = ?, password = ?, role = ? WHERE id = ?";
-			params = [username, email, hashedPassword, role, id];
-		} else {
-			sql = "UPDATE users SET username = ?, email = ?, role = ? WHERE id = ?";
-			params = [username, email, role, id];
+			sql += ", password = ?";
+			params.push(hashedPassword);
 		}
+
+		if (req.user.role === "admin") {
+			sql += ", role = ?";
+			params.push(role);
+		}
+
+		sql += " WHERE id = ?";
+		params.push(id);
 
 		await req.db.execute(sql, params);
 
