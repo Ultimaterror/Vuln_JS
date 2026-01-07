@@ -31,11 +31,6 @@ const AdminArticlesPage = () => {
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
 
   useEffect(() => {
-    if (!user || user.role !== "admin") {
-      navigate("/login");
-      return;
-    }
-
     // Récupérer les articles et leurs commentaires
     const fetchArticles = async () => {
       try {
@@ -86,11 +81,12 @@ const AdminArticlesPage = () => {
       };
 
       try {
-        await axiosInstance.put(`/articles/${editingArticle.id}`, newArticle);
+        const response = await axiosInstance.put(`/articles/${editingArticle.id}`, newArticle);
         toast.success("Article mis à jour !");
+
         setArticles(
           articles.map((article) =>
-            article.id === editingArticle.id ? { ...article, ...newArticle } : article
+            article.id === editingArticle.id ? { ...article, ...response.data.article } : article
           )
         );
         setEditingArticle(null);
@@ -112,7 +108,8 @@ const AdminArticlesPage = () => {
       try {
         const response = await axiosInstance.post("/articles", newArticle);
         toast.success("Article ajouté !");
-        setArticles([...articles, { ...newArticle, id: response.data.id, comments: [] }]);
+
+        setArticles([...articles, { ...response.data.article, comments: [] }]);
         setTitle("");
         setContent("");
         if (quillRef.current) {
